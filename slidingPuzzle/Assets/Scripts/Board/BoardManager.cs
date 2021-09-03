@@ -5,21 +5,13 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    /*
-     * 00 01 02
-     * 10 11 12
-     * 20 21 22
-     */
-
     [SerializeField] private BoardConfigScriptableObject _boardConfig;
     [SerializeField] private List<PieceUIManager> _pieceManagers;
 
     [SerializeField] private Transform _pieceUIManagerPrefab;
     [SerializeField] private Transform _pieceParentTransform;
 
-    private List<int> _result = new List<int> {1, 2, 3, 4, 5, 6, 7, -1, 8};
-
-    public static Piece FreePiece;
+    public static PieceUIManager FreePiece;
 
     private void Awake()
     {
@@ -35,30 +27,31 @@ public class BoardManager : MonoBehaviour
     
     private void InitBoard()
     {
-        int boardVerticalSize = _boardConfig.GetBoardVerticalSize;
-        int boardHorizontalSize = _boardConfig.GetBoardHorizontalSize;
+        int boardMaxSize = _boardConfig.GetBoardMaxSize;
+        float pieceMaxSize = _boardConfig.GetPieceMaxSize;
 
-        float pieceVerticalSize = _boardConfig.GetPieceVerticalSize;
-        float pieceHorizontalSize = _boardConfig.GetPieceHorizontalSize;
-
-        FreePiece = new Piece(2, 2, _boardConfig.GetPieceVerticalSize, _boardConfig.GetPieceHorizontalSize, boardVerticalSize);
         
-        for (int i = 0; i < boardHorizontalSize; i++)
+        for (int i = 0; i < _boardConfig.Result.Count; i++)
         {
-            for (int j = 0; j < boardVerticalSize; j++)
-            {
-                CreatePiece(j, i, pieceVerticalSize, pieceHorizontalSize, boardVerticalSize);
-            }
+            int verticalIndex = i / boardMaxSize;
+            int horizontalIndex = i % boardMaxSize;
+            
+            CreatePiece(verticalIndex, horizontalIndex, pieceMaxSize, boardMaxSize, _boardConfig.Result[i]);
         }
     }
 
-    private void CreatePiece(int j, int i, float pieceVerticalSize, float pieceHorizontalSize, int boardVerticalMaxSize)
+    private void CreatePiece(int j, int i, float pieceSize, int boardMaxSize, int initialValue)
     {
         Transform pieceUIManagerTransform = Instantiate(_pieceUIManagerPrefab, Vector3.zero, Quaternion.identity, _pieceParentTransform);
         PieceUIManager pieceUIManager = pieceUIManagerTransform.GetComponent<PieceUIManager>();
-        pieceUIManager.InitPiece(j, i, pieceVerticalSize, pieceHorizontalSize, boardVerticalMaxSize);
+        pieceUIManager.InitPiece(j, i, pieceSize, boardMaxSize, initialValue);
         
         _pieceManagers.Add(pieceUIManager);
+
+        if (initialValue == -1)
+        {
+            FreePiece = pieceUIManager;
+        }
     }
 
     public void CheckResult()
@@ -71,7 +64,7 @@ public class BoardManager : MonoBehaviour
 
             int pieceValue = Convert.ToInt32(pieceValueString);
 
-            if(_result[pieceUIManager.GetIndex()] == pieceValue)
+            if(_boardConfig.Result[pieceUIManager.GetIndex()] == pieceValue)
                 continue;
 
             Debug.Log("Fail");

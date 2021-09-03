@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20d93b211994442f83b877e3938ecdbf, type: 3}
   m_Name: BoardConfigScriptableObject
   m_EditorClassIdentifier: 
-  _boardVerticalSize: 4
-  _boardHorizontalSize: 4
+  _boardMaxSize: 4
+  _result: 0100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000ffffffff

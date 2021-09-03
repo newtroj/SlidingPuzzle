@@ -12,8 +12,8 @@ namespace DefaultNamespace
         private RectTransform _rectTransform;
         private Vector2 _anchorMinPosition = Vector2.zero;
         private Vector2 _anchorMaxPosition = Vector2.zero;
-        
-        private Piece _myPiece;
+
+        public Piece MyPiece { get; private set; }
         
         public static event Action EvtMove;
         
@@ -23,19 +23,21 @@ namespace DefaultNamespace
             _rectTransform.localPosition = Vector3.zero;
         }
 
-        public void InitPiece(int verticalIndex, int horizontalIndex, float verticalSize, float horizontalSize, int boardVerticalMaxSize)
+        public void InitPiece(int verticalIndex, int horizontalIndex, float pieceSize, int boardMaxSize, int initialValue)
         {
-            _myPiece = new Piece(verticalIndex, horizontalIndex, verticalSize, horizontalSize, boardVerticalMaxSize);
-            _text.text = _myPiece.GetIndex().ToString();
+            MyPiece = new Piece(verticalIndex, horizontalIndex, pieceSize, boardMaxSize, initialValue);
+            _text.text = initialValue.ToString();
             UpdatePosition();
         }
 
         public void UpdatePosition()
         {
-            _anchorMinPosition.x = _myPiece.GetHorizontalMinPosition;
-            _anchorMinPosition.y = _myPiece.GetVerticalMaxPosition;
-            _anchorMaxPosition.x = _myPiece.GetHorizontalMaxPosition;
-            _anchorMaxPosition.y = _myPiece.GetVerticalMinPosition;
+            gameObject.name = $"({MyPiece.VerticalIndex}|{MyPiece.HorizontalIndex})";
+            
+            _anchorMinPosition.x = MyPiece.GetHorizontalMinPosition;
+            _anchorMinPosition.y = MyPiece.GetVerticalMaxPosition;
+            _anchorMaxPosition.x = MyPiece.GetHorizontalMaxPosition;
+            _anchorMaxPosition.y = MyPiece.GetVerticalMinPosition;
             
             _rectTransform.anchorMin = _anchorMinPosition;
             _rectTransform.anchorMax = _anchorMaxPosition;
@@ -43,7 +45,7 @@ namespace DefaultNamespace
 
         public void OnClick()
         {
-            bool hasSameAxis = _myPiece.SameAxis(BoardManager.FreePiece);
+            bool hasSameAxis = MyPiece.SameAxis(BoardManager.FreePiece.MyPiece);
         
             if(!hasSameAxis)
                 return;
@@ -51,17 +53,19 @@ namespace DefaultNamespace
             SwitchPosition(BoardManager.FreePiece);
         }
 
-        private void SwitchPosition(Piece otherPiece)
+        private void SwitchPosition(PieceUIManager otherPieceUIManager)
         {
-            _myPiece.SwitchPosition(otherPiece);
+            MyPiece.SwitchPosition(otherPieceUIManager.MyPiece);
             
             UpdatePosition();
+            otherPieceUIManager.UpdatePosition();
+            
             EvtMove?.Invoke();
         }
 
         public int GetIndex()
         {
-            return _myPiece.GetIndex();
+            return MyPiece.GetIndex();
         }
     }
 }
